@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portineria – Archivio Storico</title>
+<meta name="theme-color" content="#0a7">
+<style>
+  :root{--pri:#0a7;--pri-d:#098a68;--pri-l:#e6f6f0;--bg:#f6f7f9;--card:#fff;--line:#e5e7eb;--muted:#6b7280;--ink:#0d1b2a}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,sans-serif;background:var(--bg);margin:0;color:var(--ink)}
+  header{background:linear-gradient(90deg,var(--pri),#0aa07c);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;font-weight:800;flex-wrap:wrap}
+  header img{height:32px}
+  main{max-width:1100px;margin:0 auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  h2{margin:0 0 10px;color:var(--pri)}
+  label{font-size:12px;color:var(--muted)}
+  input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;margin-top:4px}
+  input:focus,select:focus{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri-l);outline:none}
+  .grid{display:grid;gap:10px}
+  .cols-4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:1000px){.cols-4{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:640px){.cols-4{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+  th,td{border-bottom:1px solid var(--line);padding:7px;text-align:left;vertical-align:top}
+  thead th{background:var(--pri-l);color:#0c5131;position:sticky;top:0;z-index:1}
+  tbody tr:nth-child(even){background:#fafafa}
+  .btn{background:var(--pri);color:#fff;border:none;border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:800;font-size:14px}
+  .btn:hover{background:var(--pri-d)}
+  .btn.secondary{background:#eef2f7;color:#111}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#eef2f7;border:1px solid var(--line);font-size:12px;color:#111;margin-left:6px}
+</style>
+</head>
+<body>
+<header>
+  <img src="logo.jpg" alt="Logo">
+  Archivio Storico <span class="pill" id="count-pill">0</span>
+</header>
+
+<main>
+  <section class="card">
+    <h2>🔎 Filtri (combinabili)</h2>
+
+    <div class="grid cols-4">
+      <div>
+        <label>Ricerca generale (nome, corriere, codice, note, evento)</label>
+        <input type="text" id="f-q" placeholder="Es. Rossi, GLS, 123, arrivo, consegna...">
+      </div>
+      <div>
+        <label>Evento</label>
+        <select id="f-evento">
+          <option value="">Tutti</option>
+        </select>
+      </div>
+      <div>
+        <label>Destinatario (nome)</label>
+        <input type="text" id="f-dest" placeholder="Es. Rossi Maria">
+      </div>
+      <div>
+        <label>Interno / Scala</label>
+        <input type="text" id="f-interno" placeholder="Es. Int. 8 / Scala B">
+      </div>
+    </div>
+
+    <div class="grid cols-4" style="margin-top:10px;">
+      <div>
+        <label>Corriere</label>
+        <input type="text" id="f-corriere" placeholder="GLS, SDA, BRT...">
+      </div>
+      <div>
+        <label>Codice</label>
+        <input type="text" id="f-codice" placeholder="Codice pacco...">
+      </div>
+      <div>
+        <label>Ritirante</label>
+        <input type="text" id="f-ritirante" placeholder="Nome ritirante...">
+      </div>
+      <div>
+        <label>Note</label>
+        <input type="text" id="f-note" placeholder="Fragile, delega...">
+      </div>
+    </div>
+
+    <div class="grid cols-4" style="margin-top:10px;">
+      <div>
+        <label>Arrivo: da</label>
+        <input type="date" id="f-arrivo-da">
+      </div>
+      <div>
+        <label>Arrivo: a</label>
+        <input type="date" id="f-arrivo-a">
+      </div>
+      <div>
+        <label>Consegna: da</label>
+        <input type="date" id="f-cons-da">
+      </div>
+      <div>
+        <label>Consegna: a</label>
+        <input type="date" id="f-cons-a">
+      </div>
+    </div>
+
+    <div class="btnrow">
+      <button class="btn secondary" id="reset">Reset filtri</button>
+      <button class="btn secondary" id="btn-rebuild">🧩 Ricostruisci storico (Arrivi + Consegnati)</button>
+      <button class="btn" id="btn-print">🖨 Stampa (filtrato)</button>
+      <button class="btn secondary" id="btn-xls-filter">📊 Excel (solo filtrato)</button>
+      <button class="btn secondary" id="btn-xls-all">📁 Excel (tutto archivio)</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>📚 Risultati</h2>
+    <div style="overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:12px;">
+      <table id="tab">
+        <thead>
+          <tr>
+            <th>Arrivo</th>
+            <th>Destinatario</th>
+            <th>Corriere</th>
+            <th>Interno</th>
+            <th>Codice</th>
+            <th>Note</th>
+            <th>Evento</th>
+            <th>Consegna</th>
+            <th>Ritirante</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const LS_ARRIVI   = 'portineria2c_pacchi';
+const LS_CONS     = 'portineria2c_consegnati';
+const LS_STORICO  = 'portineria2c_storico';
+
+function carica(base){
+  try { return JSON.parse(localStorage.getItem(base) || '[]'); }
+  catch { return []; }
+}
+function salva(base,v){ localStorage.setItem(base, JSON.stringify(v)); }
+
+function ymdLocal(x){
+  const d = new Date(x);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function inRange(iso, fromYMD, toYMD){
+  if(!fromYMD && !toYMD) return true;
+  if(!iso) return false;
+  const v = ymdLocal(iso);
+  if(fromYMD && v < fromYMD) return false;
+  if(toYMD && v > toYMD) return false;
+  return true;
+}
+function fmtDT(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const date = d.toLocaleDateString('it-IT');
+  const time = d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  return `${date} ${time}`;
+}
+
+let LAST_FILTERED = [];
+
+function normalizeEvento(e){
+  return String(e||'').trim().toLowerCase();
+}
+
+function buildEventoOptions(){
+  const sel = document.getElementById('f-evento');
+  if(!sel) return;
+  const dati = carica(LS_STORICO);
+  const set = new Set(dati.map(r=>normalizeEvento(r.evento)).filter(Boolean));
+  // ordine "furbo": arrivo / consegna / raccomandata prima, poi il resto
+  const prefer = ['arrivo','consegna','raccomandata'];
+  const rest = [...set].filter(x=>!prefer.includes(x)).sort();
+  const ordered = [...prefer.filter(x=>set.has(x)), ...rest];
+
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Tutti</option>' + ordered.map(x=>`<option value="${x}">${x}</option>`).join('');
+  // ripristina selezione se possibile
+  if(cur && ordered.includes(cur)) sel.value = cur;
+}
+
+function applyFilters(){
+  const q = (document.getElementById('f-q').value || '').toLowerCase().trim();
+  const ev = normalizeEvento(document.getElementById('f-evento').value);
+  const dest = (document.getElementById('f-dest').value || '').toLowerCase().trim();
+  const interno = (document.getElementById('f-interno').value || '').toLowerCase().trim();
+  const cor = (document.getElementById('f-corriere').value || '').toLowerCase().trim();
+  const cod = (document.getElementById('f-codice').value || '').toLowerCase().trim();
+  const rit = (document.getElementById('f-ritirante').value || '').toLowerCase().trim();
+  const note = (document.getElementById('f-note').value || '').toLowerCase().trim();
+  const aDa = document.getElementById('f-arrivo-da').value;
+  const aA  = document.getElementById('f-arrivo-a').value;
+  const cDa = document.getElementById('f-cons-da').value;
+  const cA  = document.getElementById('f-cons-a').value;
+
+  let dati = carica(LS_STORICO);
+
+  dati = dati.filter(r=>{
+    const evento = normalizeEvento(r.evento);
+    if(ev && evento !== ev) return false;
+
+    if(dest && !String(r.dest||'').toLowerCase().includes(dest)) return false;
+    if(interno && !String(r.interno||'').toLowerCase().includes(interno)) return false;
+    if(cor && !String(r.corriere||'').toLowerCase().includes(cor)) return false;
+
+    const codice = String(r.codice || r.note || '').toLowerCase();
+    if(cod && !codice.includes(cod)) return false;
+
+    if(note && !String(r.note||'').toLowerCase().includes(note)) return false;
+    if(rit && !String(r.ritirante||'').toLowerCase().includes(rit)) return false;
+
+    // Arrivo range
+    if(!inRange(r.data, aDa, aA)) return false;
+
+    // Consegna range: solo record con consegna
+    if(cDa || cA){
+      if(!r.dataconsegna) return false;
+      if(!inRange(r.dataconsegna, cDa, cA)) return false;
+    }
+
+    if(q){
+      // qui puoi cercare insieme nominativo + evento ecc.
+      const hay = `${r.dest||''} ${r.corriere||''} ${r.interno||''} ${r.ritirante||''} ${r.note||''} ${r.codice||''} ${r.evento||''}`.toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  LAST_FILTERED = dati;
+  renderTable(dati);
+  document.getElementById('count-pill').textContent = `${dati.length} risultati`;
+}
+
+function renderTable(dati){
+  const tb = document.querySelector('#tab tbody');
+  tb.innerHTML = dati.map(r=>`
+    <tr>
+      <td>${fmtDT(r.data)||''}</td>
+      <td><b>${r.dest||''}</b></td>
+      <td>${r.corriere||''}</td>
+      <td>${r.interno||''}</td>
+      <td>${r.codice||''}</td>
+      <td>${r.note||''}</td>
+      <td>${r.evento||''}</td>
+      <td>${fmtDT(r.dataconsegna)||''}</td>
+      <td>${r.ritirante||''}</td>
+    </tr>
+  `).join('');
+}
+
+function resetFilters(){
+  ['f-q','f-dest','f-interno','f-corriere','f-codice','f-ritirante','f-note','f-arrivo-da','f-arrivo-a','f-cons-da','f-cons-a']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const sel = document.getElementById('f-evento'); if(sel) sel.value='';
+  applyFilters();
+}
+
+function openPrint(html){
+  const w = window.open('','_blank');
+  w.document.write(`
+    <!DOCTYPE html><html><head><meta charset="utf-8"><title>Stampa</title>
+    <style>
+      body{font-family:sans-serif;margin:20px}
+      table{width:100%;border-collapse:collapse}
+      th,td{border:1px solid #ccc;padding:6px;text-align:left}
+      thead{background:#eaf7f1}
+    </style>
+    </head><body>${html}<script>window.print()<\/script></body></html>
+  `);
+  w.document.close();
+}
+
+function exportExcel(rows, filename){
+  const wb = XLSX.utils.book_new();
+  const cleaned = rows.map(r=>({
+    evento: r.evento || '',
+    data_arrivo: fmtDT(r.data) || '',
+    destinatario: r.dest || '',
+    corriere: r.corriere || '',
+    interno: r.interno || '',
+    codice: r.codice || '',
+    note: r.note || '',
+    data_consegna: fmtDT(r.dataconsegna) || '',
+    ritirante: r.ritirante || ''
+  }));
+  const ws = XLSX.utils.json_to_sheet(cleaned);
+  XLSX.utils.book_append_sheet(wb, ws, 'Storico');
+  XLSX.writeFile(wb, filename);
+}
+
+function rebuildStorico(){
+  const st = carica(LS_STORICO);
+  const arr = carica(LS_ARRIVI);
+  const cons = carica(LS_CONS);
+
+  const seen = new Set(st.map(x => `${x._id||x.id||''}::${normalizeEvento(x.evento)}::${x.data||''}`));
+
+  const add = (rec, evento)=>{
+    const key = `${rec._id||rec.id||''}::${evento}::${rec.data||''}`;
+    if(seen.has(key)) return;
+    seen.add(key);
+    st.unshift({ ...rec, evento });
+  };
+
+  arr.forEach(a => add(a, 'arrivo'));
+  cons.forEach(c => add(c, 'consegna'));
+
+  salva(LS_STORICO, st);
+  buildEventoOptions();
+  applyFilters();
+  alert('Storico ricostruito!');
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  buildEventoOptions();
+  applyFilters();
+
+  document.getElementById('reset').onclick = resetFilters;
+  document.getElementById('btn-rebuild').onclick = rebuildStorico;
+
+  document.getElementById('btn-print').onclick = ()=>{
+    const rows = LAST_FILTERED;
+    const trs = rows.map(r=>`
+      <tr>
+        <td>${fmtDT(r.data)||''}</td>
+        <td>${r.dest||''}</td>
+        <td>${r.corriere||''}</td>
+        <td>${r.interno||''}</td>
+        <td>${r.codice||''}</td>
+        <td>${r.note||''}</td>
+        <td>${r.evento||''}</td>
+        <td>${fmtDT(r.dataconsegna)||''}</td>
+        <td>${r.ritirante||''}</td>
+      </tr>`).join('');
+    openPrint(`<h1>Archivio Storico (filtrato)</h1>
+      <table><thead><tr>
+      <th>Arrivo</th><th>Destinatario</th><th>Corriere</th><th>Interno</th><th>Codice</th><th>Note</th><th>Evento</th><th>Consegna</th><th>Ritirante</th>
+      </tr></thead><tbody>${trs}</tbody></table>`);
+  };
+
+  document.getElementById('btn-xls-filter').onclick = ()=> exportExcel(LAST_FILTERED, 'Storico_Portineria_FILTRATO.xlsx');
+  document.getElementById('btn-xls-all').onclick = ()=> exportExcel(carica(LS_STORICO), 'Storico_Portineria_COMPLETO.xlsx');
+
+  ['f-q','f-evento','f-dest','f-interno','f-corriere','f-codice','f-ritirante','f-note','f-arrivo-da','f-arrivo-a','f-cons-da','f-cons-a']
+    .forEach(id=>document.getElementById(id).addEventListener('input', applyFilters));
+});
+</script>
+</body>
+</html>

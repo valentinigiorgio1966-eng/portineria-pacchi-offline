@@ -210,7 +210,7 @@
 
 </div>
 
-<!-- XLSX removed for offline -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 /* === CHIAVI LOCALSTORAGE === */
 const LS_ARRIVI   = 'portineria2c_pacchi';
@@ -622,33 +622,7 @@ function openPrint(html){
       th,td{border:1px solid #ccc;padding:6px;text-align:left}
       thead{background:#eaf7f1}
     </style>
-    </head><body>${html}<script>window.print()<\/script>
-<script>
-/* Fallback export (offline) - se XLSX non è disponibile, esporta in .xls (HTML) o .json */
-function __ppDownload(filename, content, mime){
-  try{
-    const blob = new Blob([content], {type: mime});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 1500);
-  }catch(e){ console.log(e); alert('Download non riuscito.'); }
-}
-function __ppEscape(s){
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function __ppExportXlsHtml(filename, aoa){
-  let html = '<html><head><meta charset="utf-8"></head><body><table border="1">';
-  for(const row of aoa){
-    html += '<tr>' + row.map(c=>'<td>'+__ppEscape(c)+'</td>').join('') + '</tr>';
-  }
-  html += '</table></body></html>';
-  __ppDownload(filename, html, 'application/vnd.ms-excel');
-}
-</script>
-
-</body></html>
+    </head><body>${html}<script>window.print()<\/script></body></html>
   `);
   w.document.close();
 }
@@ -870,31 +844,5 @@ function avviaApp(){
 
 document.addEventListener('DOMContentLoaded', avviaApp);
 </script>
-
-<script>
-/* Fallback export (offline) - se XLSX non è disponibile, esporta in .xls (HTML) o .json */
-function __ppDownload(filename, content, mime){
-  try{
-    const blob = new Blob([content], {type: mime});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 1500);
-  }catch(e){ console.log(e); alert('Download non riuscito.'); }
-}
-function __ppEscape(s){
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function __ppExportXlsHtml(filename, aoa){
-  let html = '<html><head><meta charset="utf-8"></head><body><table border="1">';
-  for(const row of aoa){
-    html += '<tr>' + row.map(c=>'<td>'+__ppEscape(c)+'</td>').join('') + '</tr>';
-  }
-  html += '</table></body></html>';
-  __ppDownload(filename, html, 'application/vnd.ms-excel');
-}
-</script>
-
 </body>
 </html>
