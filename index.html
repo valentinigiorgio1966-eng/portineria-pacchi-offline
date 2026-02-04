@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portineria Casalmonferrato 2C – G. Valentini</title>
+<meta name="theme-color" content="#0a7">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root{
+    --bg:#f6f7f9;
+    --card:#fff;
+    --ink:#0d1b2a;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --pri:#0a7;
+    --pri-d:#098a68;
+    --pri-l:#e6f6f0;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--ink);}
+  header.appbar{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    position:sticky;top:0;z-index:10;
+    background:linear-gradient(90deg,var(--pri),#0aa07c);
+    color:#fff;font-weight:700;padding:12px 18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+  header.appbar img{height:32px;width:auto}
+  main{padding:16px;max-width:1100px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:16px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  h2.section-title{color:var(--pri);margin-top:0;font-size:20px;display:flex;align-items:center;gap:6px}
+  label{font-size:12px;color:var(--muted)}
+  select,input[type=text],input[type=datetime-local],input[type=date]{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px}
+  textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;resize:vertical}
+  input:focus,select:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri-l);outline:none}
+  .grid{display:grid;gap:10px}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:800px){.cols-3{grid-template-columns:1fr}}
+  .btn{background:var(--pri);color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--pri-d)}
+  .btn.secondary{background:#eef2f7;color:#111}
+  .toolbar{position:sticky;bottom:0;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);border-top:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+  thead th{background:var(--pri-l);color:#0c5131}
+  tbody tr:nth-child(even){background:#fafafa}
+  @media print{header.appbar,.toolbar,.no-print{display:none!important}}
+
+  /* Modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
+  .modal{background:#fff;border-radius:16px;max-width:420px;width:100%;border:1px solid var(--line);box-shadow:0 10px 40px rgba(0,0,0,.2);padding:16px}
+  .modal h3{margin:0 0 6px 0;color:var(--ink)}
+  .modal p{margin:0 0 12px 0;color:var(--muted)}
+  .modal .actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+</style>
+<!-- aggiornamento storico filtri+excel 2026-01-26T16:49:30.804184 -->
+</head>
+<body>
+<div id="app">
+
+<header class="appbar" style="justify-content:space-between; padding-right:20px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="https://www.giorgiovalentini66.it" target="_blank" rel="noopener">
+      <img src="logo.jpg" alt="Logo" style="height:32px;">
+    </a>
+    Portineria Casalmonferrato 2C – G. Valentini
+  </div>
+
+  <div style="display:flex;gap:8px;">
+    <button id="btn-backup" class="btn secondary" style="padding:6px 10px;">💾 Backup</button>
+    <button id="btn-ripristina" class="btn secondary" style="padding:6px 10px;">📂 Ripristina</button>
+  </div>
+</header>
+
+<main>
+  <!-- SEZIONE: NUOVO ARRIVO / RACCOMANDATA -->
+  <section class="card">
+    <h2 class="section-title">Nuovo arrivo</h2>
+
+    <div class="grid cols-3">
+      <div>
+        <label>Inquilino / Rubrica</label>
+        <select id="sel-inquilino">
+          <option value="">— Seleziona o aggiungi inquilino —</option>
+        </select>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button id="btn-add-inquilino" class="btn secondary" style="flex:1">➕ Aggiungi</button>
+          <button id="btn-edit-inquilino" class="btn secondary" style="flex:1">✏️ Modifica</button>
+          <button id="btn-del-inquilino" class="btn secondary" style="flex:1">🗑️ Elimina</button>
+        </div>
+      </div>
+
+      <div>
+        <label>Numero WhatsApp</label>
+        <input type="text" id="p-whatsapp" placeholder="+39xxxxxxxxxx">
+      </div>
+
+      <div>
+        <label>Data e ora</label>
+        <input type="datetime-local" id="p-data">
+      </div>
+    </div>
+
+    <div class="grid cols-3" style="margin-top:8px">
+      <div><label>Destinatario</label><input type="text" id="p-dest" placeholder="Es. Rossi Maria"></div>
+      <div><label>Corriere</label><input type="text" id="p-corriere" placeholder="GLS, BRT, SDA…"></div>
+      <div><label>Interno / Scala</label><input type="text" id="p-interno" placeholder="Scala B, Int. 8"></div>
+    </div>
+
+    <div class="grid cols-3" style="margin-top:8px">
+      <div><label>Note (Codice pacco)</label><input type="text" id="p-note" placeholder="Fragile, ecc."></div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <button id="btn-salva" class="btn">📦 Registra pacco</button>
+        <button id="btn-racc" class="btn secondary">✉️ Registra raccomandata</button>
+        <button id="btn-whatsapp" class="btn secondary">📱 Invia messaggio</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEZIONE: PACCHI IN PORTINERIA -->
+  <section class="card">
+    <h2 class="section-title">Pacchi in portineria</h2>
+
+    <div class="grid cols-3 no-print" style="margin-top:8px">
+      <div><label>Arrivi: da</label><input type="date" id="f-arrivi-da"></div>
+      <div><label>Arrivi: a</label><input type="date" id="f-arrivi-a"></div>
+      <div style="display:flex;align-items:flex-end;gap:8px;">
+        <button class="btn secondary" id="btn-reset-arrivi">Reset filtri</button>
+      </div>
+    </div>
+
+    <div class="grid cols-3 no-print" style="margin-top:8px">
+      <div><label>Arrivi: nome</label><input type="text" id="f-arrivi-nome" placeholder="Rossi..."></div>
+      <div><label>Arrivi: interno</label><input type="text" id="f-arrivi-interno" placeholder="Int. 8 / Scala B..."></div>
+      <div><label>Arrivi: corriere</label><input type="text" id="f-arrivi-corriere" placeholder="GLS, BRT..."></div>
+    </div>
+
+    <div class="grid cols-3 no-print" style="margin-top:8px">
+      <div><label>Arrivi: codice</label><input type="text" id="f-arrivi-codice" placeholder="Codice..."></div>
+      <div><label>Arrivi: note</label><input type="text" id="f-arrivi-note" placeholder="Fragile..."></div>
+      <div><label>Arrivi: WhatsApp</label><input type="text" id="f-arrivi-wa" placeholder="+39..."></div>
+    </div>
+
+    <table id="tab-pacchi">
+      <thead>
+        <tr><th>Data</th><th>Ora</th><th>Destinatario</th><th>Corriere</th><th>Interno</th><th>WA</th><th>Note</th><th>Azioni</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- SEZIONE: PACCHI CONSEGNATI -->
+  <section class="card">
+    <h2 class="section-title">Pacchi consegnati</h2>
+
+    <div class="grid cols-3 no-print" style="margin-top:8px">
+      <div><label>Consegnati (arrivo): da</label><input type="date" id="f-cons-da"></div>
+      <div><label>Consegnati (arrivo): a</label><input type="date" id="f-cons-a"></div>
+      <div style="display:flex;align-items:flex-end;gap:8px;">
+        <button class="btn secondary" id="btn-reset-cons">Reset filtri</button>
+      </div>
+    </div>
+
+    <div class="grid cols-3 no-print" style="margin-top:8px">
+      <div><label>Consegnati: nome</label><input type="text" id="f-cons-nome" placeholder="Rossi..."></div>
+      <div><label>Consegnati: ritirante</label><input type="text" id="f-cons-rit" placeholder="Mario..."></div>
+      <div><label>Consegnati: corriere</label><input type="text" id="f-cons-corriere" placeholder="GLS, BRT..."></div>
+    </div>
+
+    <div class="grid cols-3 no-print" style="margin-top:8px">
+      <div><label>Consegnati: codice</label><input type="text" id="f-cons-codice" placeholder="Codice..."></div>
+      <div><label>Consegnati: interno</label><input type="text" id="f-cons-interno" placeholder="Int. 8 / Scala B..."></div>
+      <div><label>Consegnati: note</label><input type="text" id="f-cons-note" placeholder="Note..."></div>
+    </div>
+
+    <table id="tab-consegnati">
+      <thead>
+        <tr><th>Data arrivo</th><th>Ora arrivo</th><th>Destinatario</th><th>Ritirante</th><th>Codice</th><th>WA</th><th>Ora consegna</th><th>Note</th><th>Azioni</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</main>
+
+<div class="toolbar no-print">
+  <button class="btn secondary" id="btn-stampa-arrivi">🖨️ Stampa arrivi</button>
+  <button class="btn secondary" id="btn-stampa-cons">📦 Stampa consegnati</button>
+  <button class="btn secondary" id="btn-svuota-arrivi">🧹 Svuota arrivi</button>
+  <button class="btn secondary" id="btn-svuota-cons">🧾 Svuota consegnati</button>
+  <button class="btn secondary" id="btn-esporta-excel">📊 Esporta in Excel</button>
+  <button class="btn secondary" id="btn-stampa-rubrica">📇 Stampa rubrica</button>
+  <button class="btn secondary" id="btn-importa-rubrica">📥 Importa rubrica</button>
+  <button class="btn secondary" id="btn-apri-manuale">📘 Manuale</button>
+  <button class="btn secondary" onclick="window.open('storico.html','_blank')">📚 Archivio Storico</button>
+</div>
+
+<!-- Modal stampa ricevuta -->
+<div id="modal-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal">
+    <h3>Stampare la ricevuta?</h3>
+    <p>Vuoi stampare la ricevuta di consegna adesso?</p>
+    <div class="actions">
+      <button id="modal-no" class="btn secondary">No</button>
+      <button id="modal-yes" class="btn">Sì</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- XLSX removed for offline -->
+<script>
+/* === CHIAVI LOCALSTORAGE === */
+const LS_ARRIVI   = 'portineria2c_pacchi';
+const LS_CONS     = 'portineria2c_consegnati';
+const LS_RUBRICA  = 'portineria2c_rubrica';
+const LS_STORICO  = 'portineria2c_storico';
+
+/* Utility base */
+const $ = s => document.querySelector(s);
+
+function carica(k){
+  try { return JSON.parse(localStorage.getItem(k) || '[]'); }
+  catch { return []; }
+}
+function salva(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function fmtData(x){ if(!x) return ''; return new Date(x).toLocaleDateString('it-IT'); }
+function fmtOra(x){ if(!x) return ''; return new Date(x).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}); }
+function ymdLocal(x){
+  const d = new Date(x);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function isWithinRange(x, fromYMD, toYMD){
+  if(!fromYMD && !toYMD) return true;
+  const v = ymdLocal(x);
+  if(fromYMD && v < fromYMD) return false;
+  if(toYMD && v > toYMD) return false;
+  return true;
+}
+function ensureId(rec){
+  if(rec && !rec._id){
+    rec._id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2));
+  }
+  return rec;
+}
+
+/* === BACKUP COMPLETO === */
+function backupDatabase() {
+  const data = {
+    arrivi:    carica(LS_ARRIVI),
+    consegnati:carica(LS_CONS),
+    rubrica:   carica(LS_RUBRICA),
+    storico:   carica(LS_STORICO)
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Backup_Portineria2C.json';
+  a.click();
+}
+
+/* === RIPRISTINA DA BACKUP === */
+function ripristinaDatabase() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        salva(LS_ARRIVI, (data.arrivi || []).map(ensureId));
+        salva(LS_CONS, (data.consegnati || []).map(ensureId));
+        salva(LS_RUBRICA, data.rubrica || []);
+        salva(LS_STORICO, data.storico || []);
+        avviaApp();
+        alert("Ripristino completato!");
+      } catch(err) {
+        alert("Errore: file non valido!");
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+/* --- Storico permanente --- */
+function salvaStorico(rec){
+  let st = carica(LS_STORICO);
+  st.unshift({ ...rec, timestamp: new Date().toISOString() });
+  salva(LS_STORICO, st);
+}
+
+/* --- Rubrica --- */
+function aggiornaRubrica(){
+  let r = carica(LS_RUBRICA);
+  r.sort((a,b)=>a.nome.localeCompare(b.nome,'it',{sensitivity:'base'}));
+  salva(LS_RUBRICA,r);
+
+  const sel = $('#sel-inquilino');
+  sel.innerHTML = '<option value="">— Seleziona o aggiungi inquilino —</option>';
+  r.forEach(v=>{
+    const o = document.createElement('option');
+    o.value = v.telefono;
+    o.textContent = `${v.nome} (${v.telefono})${v.note ? ' – '+v.note : ''}`;
+    sel.appendChild(o);
+  });
+}
+function aggiungiInRubrica(){
+  const nome = prompt('Nome inquilino:'); if(!nome) return;
+  const tel  = prompt('Numero WhatsApp (+39…):'); if(!tel) return;
+  const note = prompt('Note (facoltative):') || '';
+  let r = carica(LS_RUBRICA);
+  r.push({nome:nome,telefono:tel,note:note});
+  salva(LS_RUBRICA,r);
+  aggiornaRubrica();
+  alert('Inquilino aggiunto!');
+}
+function modificaInquilino(){
+  const telSel = $('#sel-inquilino').value;
+  if(!telSel) return alert('Seleziona un inquilino');
+  let r = carica(LS_RUBRICA);
+  const i = r.findIndex(x=>x.telefono===telSel);
+  if(i<0) return;
+  r[i].nome     = prompt('Modifica nome:',   r[i].nome)     || r[i].nome;
+  r[i].telefono = prompt('Modifica numero:', r[i].telefono) || r[i].telefono;
+  r[i].note     = prompt('Modifica note:',   r[i].note || '') || r[i].note || '';
+  salva(LS_RUBRICA,r);
+  aggiornaRubrica();
+  alert('Contatto aggiornato!');
+}
+function eliminaInquilino(){
+  const telSel = $('#sel-inquilino').value;
+  if(!telSel) return alert('Seleziona un inquilino');
+  if(!confirm('Eliminare definitivamente questo contatto?')) return;
+  let r = carica(LS_RUBRICA).filter(x=>x.telefono!==telSel);
+  salva(LS_RUBRICA,r);
+  aggiornaRubrica();
+  alert('Inquilino eliminato!');
+}
+function selezionaInquilino(){
+  $('#p-whatsapp').value = this.value;
+}
+
+/* --- WhatsApp --- */
+function waDigits(input){ return String(input||'').replace(/\D/g,''); }
+function apriWhatsApp(numero, messaggio){
+  const digits = waDigits(numero);
+  if(!digits) return alert('Inserisci un numero WhatsApp valido');
+  const testo = encodeURIComponent(messaggio || '📦 C’è un pacco per te in portineria.');
+  window.open(`https://wa.me/${digits}?text=${testo}`, '_blank');
+}
+function inviaWhatsAppForm(){
+  const numero = ($('#p-whatsapp').value || '').trim();
+  if(!numero) return alert('Inserisci un numero WhatsApp');
+  apriWhatsApp(numero, '📦 C’è un pacco per te in portineria.');
+  // segna inviato il primo arrivo con quel numero
+  const digits = waDigits(numero);
+  let arr = carica(LS_ARRIVI);
+  const idx = arr.findIndex(a => waDigits(a.whatsapp) === digits);
+  if(idx >= 0){
+    arr[idx].whatsappSent = true;
+    salva(LS_ARRIVI, arr);
+  }
+  aggiornaArrivi();
+}
+function inviaWhatsAppArrivoById(id){
+  let arr = carica(LS_ARRIVI);
+  const p = arr.find(x=>x._id===id);
+  if(!p) return alert('Pacco non trovato');
+  if(!p.whatsapp) return alert('Nessun numero WhatsApp per questo arrivo');
+  apriWhatsApp(p.whatsapp, `📦 C’è un pacco per ${p.dest} in portineria.`);
+  p.whatsappSent = true;
+  salva(LS_ARRIVI, arr);
+  aggiornaArrivi();
+}
+
+/* --- Salva arrivo (codice = note) --- */
+function salvaArrivo(){
+  const dataIso = $('#p-data').value || new Date().toISOString();
+  const dest    = ($('#p-dest').value || '').trim();
+  if(!dest) return alert('Inserisci il destinatario');
+
+  const note = ($('#p-note').value || '').trim();
+
+  const nuovo = ensureId({
+    data:     dataIso,
+    dataSolo: fmtData(dataIso),
+    oraSolo:  fmtOra(dataIso),
+    dest,
+    corriere: ($('#p-corriere').value || '').trim(),
+    interno:  ($('#p-interno').value  || '').trim(),
+    note:     note,
+    codice:   note,
+    whatsapp: ($('#p-whatsapp').value || '').trim(),
+    whatsappSent: false
+  });
+
+  const arrivi = carica(LS_ARRIVI);
+  arrivi.unshift(nuovo);
+  salva(LS_ARRIVI, arrivi);
+  salvaStorico({ ...nuovo, evento:'arrivo' });
+
+  // reset campi
+  $('#p-data').value = $('#p-dest').value = $('#p-corriere').value =
+    $('#p-interno').value = $('#p-note').value = $('#p-whatsapp').value = '';
+
+  aggiornaArrivi();
+}
+
+/* --- Salva raccomandata (codice = note) --- */
+function salvaRaccomandata(){
+  const dataIso = new Date().toISOString();
+  const dest    = ($('#p-dest').value || '').trim();
+  if(!dest) return alert('Inserisci il destinatario della raccomandata');
+
+  const note = ($('#p-note').value || '').trim();
+
+  const nuovo = ensureId({
+    tipo: 'Raccomandata',
+    data:     dataIso,
+    dataSolo: fmtData(dataIso),
+    oraSolo:  fmtOra(dataIso),
+    dest,
+    corriere: 'Poste Italiane',
+    interno:  ($('#p-interno').value || '').trim(),
+    note:     note,
+    codice:   note,
+    whatsapp: ($('#p-whatsapp').value || '').trim(),
+    whatsappSent: false
+  });
+
+  const arrivi = carica(LS_ARRIVI);
+  arrivi.unshift(nuovo);
+  salva(LS_ARRIVI, arrivi);
+  salvaStorico({ ...nuovo, evento:'raccomandata' });
+
+  $('#p-dest').value = $('#p-note').value = '';
+  aggiornaArrivi();
+  alert('✉️ Raccomandata registrata!');
+}
+
+/* --- Filtri + Tabelle --- */
+function val(id){ const el = document.getElementById(id); return el ? String(el.value||'').trim() : ''; }
+function contains(hay, needle){ return String(hay||'').toLowerCase().includes(String(needle||'').toLowerCase()); }
+
+function getFilteredArrivi(){
+  const fDa = val('f-arrivi-da');
+  const fA  = val('f-arrivi-a');
+  const fNome = val('f-arrivi-nome');
+  const fInt  = val('f-arrivi-interno');
+  const fCor  = val('f-arrivi-corriere');
+  const fCod  = val('f-arrivi-codice');
+  const fNote = val('f-arrivi-note');
+  const fWA   = val('f-arrivi-wa');
+
+  let dati = carica(LS_ARRIVI);
+
+  return dati.filter(p=>{
+    if(!isWithinRange(p.data, fDa, fA)) return false;
+    if(fNome && !contains(p.dest, fNome)) return false;
+    if(fInt  && !contains(p.interno, fInt)) return false;
+    if(fCor  && !contains(p.corriere, fCor)) return false;
+    const codice = p.codice || p.note || '';
+    if(fCod  && !contains(codice, fCod)) return false;
+    if(fNote && !contains(p.note, fNote)) return false;
+    if(fWA   && !contains(p.whatsapp, fWA)) return false;
+    return true;
+  });
+}
+
+function aggiornaArrivi(){
+  const t = $('#tab-pacchi tbody');
+  t.innerHTML = '';
+  const dati = getFilteredArrivi();
+  dati.forEach(p=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.dataSolo||fmtData(p.data)}</td>
+      <td>${p.oraSolo||fmtOra(p.data)}</td>
+      <td><b>${p.dest||''}</b></td>
+      <td>${p.corriere||''}</td>
+      <td>${p.interno||''}</td>
+      <td>${p.whatsappSent ? '🟢' : '🔴'}</td>
+      <td>${p.note||''}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn secondary" data-wa-id="${p._id}">📱 WhatsApp</button>
+        <button class="btn secondary" data-consegna-id="${p._id}">Consegna</button>
+      </td>
+    `;
+    t.appendChild(tr);
+  });
+}
+
+function getFilteredConsegnati(){
+  const fDa = val('f-cons-da');
+  const fA  = val('f-cons-a');
+  const fNome = val('f-cons-nome');
+  const fRit  = val('f-cons-rit');
+  const fCor  = val('f-cons-corriere');
+  const fCod  = val('f-cons-codice');
+  const fInt  = val('f-cons-interno');
+  const fNote = val('f-cons-note');
+
+  let dati = carica(LS_CONS);
+
+  return dati.filter(p=>{
+    if(!isWithinRange(p.data, fDa, fA)) return false; // range su data arrivo
+    if(fNome && !contains(p.dest, fNome)) return false;
+    if(fRit  && !contains(p.ritirante, fRit)) return false;
+    if(fCor  && !contains(p.corriere, fCor)) return false;
+    const codice = p.codice || p.note || '';
+    if(fCod  && !contains(codice, fCod)) return false;
+    if(fInt  && !contains(p.interno, fInt)) return false;
+    if(fNote && !contains(p.note, fNote)) return false;
+    return true;
+  });
+}
+
+function aggiornaConsegnati(){
+  const t = $('#tab-consegnati tbody');
+  t.innerHTML = '';
+  const dati = getFilteredConsegnati();
+
+  dati.forEach(p=>{
+    const oraCons = fmtOra(p.oraconsegna);
+    const tr = document.createElement('tr');
+    tr.innerHTML=`
+      <td>${p.dataSolo||fmtData(p.data)}</td>
+      <td>${p.oraSolo||fmtOra(p.data)}</td>
+      <td><b>${p.dest||''}</b></td>
+      <td>${p.ritirante||''}</td>
+      <td>${p.codice||''}</td>
+      <td>${p.whatsappSent ? '🟢' : '🔴'}</td>
+      <td>${oraCons}</td>
+      <td>${p.note||''}</td>
+      <td><button class="btn secondary" data-ricevuta-id="${p._id}">Ricevuta</button></td>
+    `;
+    t.appendChild(tr);
+  });
+}
+
+/* --- Modal stampa --- */
+function chiediStampaRicevuta(){
+  return new Promise((resolve)=>{
+    const back = document.getElementById('modal-backdrop');
+    const yes  = document.getElementById('modal-yes');
+    const no   = document.getElementById('modal-no');
+
+    const cleanup = ()=>{
+      back.style.display='none';
+      back.setAttribute('aria-hidden','true');
+      yes.onclick = null;
+      no.onclick  = null;
+      back.onclick = null;
+      document.removeEventListener('keydown', onKey);
+    };
+    const onKey = (ev)=>{
+      if(ev.key === 'Escape'){ cleanup(); resolve(false); }
+    };
+
+    back.style.display='flex';
+    back.setAttribute('aria-hidden','false');
+
+    yes.onclick = ()=>{ cleanup(); resolve(true); };
+    no.onclick  = ()=>{ cleanup(); resolve(false); };
+    back.onclick = (e)=>{ if(e.target === back){ cleanup(); resolve(false); } };
+    document.addEventListener('keydown', onKey);
+  });
+}
+
+/* --- Consegna pacco --- */
+async function consegnaPaccoById(id){
+  const arr = carica(LS_ARRIVI);
+  const idx = arr.findIndex(x=>x._id===id);
+  const p   = idx>=0 ? arr[idx] : null;
+  if(!p) return alert('Pacco non trovato');
+
+  const rit  = prompt('Nome del ritirante:'); if(!rit) return;
+  const doc  = prompt('Documento (facoltativo):') || '';
+  const note = prompt('Note (facoltativo):')      || '';
+
+  const cons = carica(LS_CONS);
+  const rec = ensureId({
+    ...p,
+    ritirante:   rit,
+    documento:   doc,
+    note:        note,
+    dataconsegna: new Date().toISOString(),
+    oraconsegna:  new Date().toISOString()
+  });
+  cons.unshift(rec);
+
+  salva(LS_CONS, cons);
+  salvaStorico({ ...rec, evento:'consegna' });
+
+  arr.splice(idx,1);
+  salva(LS_ARRIVI, arr);
+
+  aggiornaArrivi();
+  aggiornaConsegnati();
+
+  const doPrint = await chiediStampaRicevuta();
+  if(doPrint) stampaRicevutaById(rec._id);
+}
+
+/* --- Stampa generica --- */
+function openPrint(html){
+  const w = window.open('','_blank');
+  w.document.write(`
+    <!DOCTYPE html><html><head><meta charset="utf-8"><title>Stampa</title>
+    <style>
+      body{font-family:sans-serif;margin:20px}
+      table{width:100%;border-collapse:collapse}
+      th,td{border:1px solid #ccc;padding:6px;text-align:left}
+      thead{background:#eaf7f1}
+    </style>
+    </head><body>${html}<script>window.print()<\/script>
+<script>
+/* Fallback export (offline) - se XLSX non è disponibile, esporta in .xls (HTML) o .json */
+function __ppDownload(filename, content, mime){
+  try{
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }catch(e){ console.log(e); alert('Download non riuscito.'); }
+}
+function __ppEscape(s){
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function __ppExportXlsHtml(filename, aoa){
+  let html = '<html><head><meta charset="utf-8"></head><body><table border="1">';
+  for(const row of aoa){
+    html += '<tr>' + row.map(c=>'<td>'+__ppEscape(c)+'</td>').join('') + '</tr>';
+  }
+  html += '</table></body></html>';
+  __ppDownload(filename, html, 'application/vnd.ms-excel');
+}
+</script>
+
+</body></html>
+  `);
+  w.document.close();
+}
+
+/* --- Stampa arrivi --- */
+function stampaArrivi(){
+  const arr = getFilteredArrivi(); // stampa ciò che vedi (filtrato)
+  const rows = arr.map(r=>`
+    <tr>
+      <td>${r.dataSolo||fmtData(r.data)}</td>
+      <td>${r.oraSolo||fmtOra(r.data)}</td>
+      <td>${r.dest||''}</td>
+      <td>${r.corriere||''}</td>
+      <td>${r.interno||''}</td>
+      <td>${r.whatsappSent ? '🟢' : '🔴'}</td>
+      <td>${r.note||''}</td>
+    </tr>`).join('');
+  openPrint(`
+    <h1>Pacchi in portineria</h1>
+    <table>
+      <thead><tr><th>Data</th><th>Ora</th><th>Destinatario</th><th>Corriere</th><th>Interno</th><th>WA</th><th>Note</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `);
+}
+
+/* --- Stampa consegnati --- */
+function stampaConsegnati(){
+  const arr = getFilteredConsegnati(); // stampa ciò che vedi (filtrato)
+  const rows = arr.map(r=>`
+    <tr>
+      <td>${r.dataSolo||fmtData(r.data)}</td>
+      <td>${r.oraSolo||fmtOra(r.data)}</td>
+      <td>${r.dest||''}</td>
+      <td>${r.ritirante||''}</td>
+      <td>${r.codice||''}</td>
+      <td>${r.whatsappSent ? '🟢' : '🔴'}</td>
+      <td>${fmtOra(r.oraconsegna)||''}</td>
+      <td>${r.note||''}</td>
+    </tr>`).join('');
+  openPrint(`
+    <h1>Pacchi consegnati</h1>
+    <table>
+      <thead><tr><th>Data arrivo</th><th>Ora arrivo</th><th>Destinatario</th><th>Ritirante</th><th>Codice</th><th>WA</th><th>Ora consegna</th><th>Note</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `);
+}
+
+/* --- Stampa ricevuta --- */
+function stampaRicevutaById(id){
+  const r = carica(LS_CONS).find(x=>x._id===id);
+  if(!r) return alert('Ricevuta non trovata');
+  openPrint(`
+    <h1>Ricevuta ritiro pacco</h1>
+    <p><b>Destinatario:</b> ${r.dest||''}</p>
+    <p><b>Corriere:</b> ${r.corriere||''}</p>
+    <p><b>Ritirato da:</b> ${r.ritirante||''}</p>
+    <p><b>Codice:</b> ${r.codice||''}</p>
+    <p><b>Data arrivo:</b> ${r.dataSolo||fmtData(r.data)||''}</p>
+    <p><b>Ora consegna:</b> ${fmtOra(r.oraconsegna)||''}</p>
+  `);
+}
+
+/* --- Stampa rubrica --- */
+function stampaRubrica(){
+  const r = carica(LS_RUBRICA);
+  if(!r.length){ alert('La rubrica è vuota!'); return; }
+  const rows = r.map(x=>`
+    <tr>
+      <td>${x.nome}</td>
+      <td>${x.telefono}</td>
+      <td>${x.note||''}</td>
+    </tr>`).join('');
+  openPrint(`
+    <h1>Rubrica Inquilini – Portineria Casalmonferrato 2C</h1>
+    <table>
+      <thead><tr><th>Nome</th><th>Numero</th><th>Note</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `);
+}
+
+/* --- Excel --- */
+function esportaExcel(){
+  const arr  = carica(LS_ARRIVI);
+  const cons = carica(LS_CONS);
+  const rub  = carica(LS_RUBRICA);
+  const wb   = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(arr),  'Arrivi');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cons), 'Consegnati');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rub),  'Rubrica');
+  XLSX.writeFile(wb, 'Portineria2C_Completo.xlsx');
+}
+
+/* --- Importa rubrica da Excel (NON sovrascrive) --- */
+document.getElementById('btn-importa-rubrica').addEventListener('click',()=>{
+  const input=document.createElement('input');
+  input.type='file';
+  input.accept='.xlsx,.xls';
+  input.onchange=e=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const data=new Uint8Array(ev.target.result);
+      const workbook=XLSX.read(data,{type:'array'});
+      const sheet=workbook.Sheets[workbook.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(sheet);
+      if(!rows.length){alert('Il file è vuoto o non leggibile');return;}
+      let rub = carica(LS_RUBRICA);
+
+      const normTel = (t) => String(t || '')
+        .trim()
+        .replace(/\s+/g,'')
+        .replace(/[()\-\.]/g,'')
+        .replace(/(?!^)\+/g,'');
+
+      const indexTel = new Set(rub.map(x => normTel(x.telefono)));
+
+      let aggiunti = 0;
+      let saltati = 0;
+
+      rows.forEach(r=>{
+        if(!r) return;
+        const nome = String(r.nome || '').trim();
+        const telefono = normTel(r.telefono);
+        if(!nome || !telefono) return;
+
+        if(indexTel.has(telefono)){ saltati++; return; }
+
+        rub.push({
+          nome,
+          telefono,
+          note: r.note ? String(r.note).trim() : ''
+        });
+        indexTel.add(telefono);
+        aggiunti++;
+      });
+
+      salva(LS_RUBRICA, rub);
+      aggiornaRubrica();
+      alert(`Rubrica importata!\nAggiunti: ${aggiunti}\nGià presenti (non sovrascritti): ${saltati}`);
+    };
+    reader.readAsArrayBuffer(file);
+  };
+  input.click();
+});
+
+/* --- Eventi click generali (delegation) --- */
+document.addEventListener('click', e=>{
+  const waBtn = e.target.closest('[data-wa-id]');
+  if(waBtn){ inviaWhatsAppArrivoById(waBtn.dataset.waId); return; }
+
+  const cBtn = e.target.closest('[data-consegna-id]');
+  if(cBtn){ consegnaPaccoById(cBtn.dataset.consegnaId); return; }
+
+  const rBtn = e.target.closest('[data-ricevuta-id]');
+  if(rBtn){ stampaRicevutaById(rBtn.dataset.ricevutaId); return; }
+});
+
+/* --- Avvio app --- */
+function avviaApp(){
+  // PWA register
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+
+  // Backups
+  document.getElementById('btn-backup').onclick = backupDatabase;
+  document.getElementById('btn-ripristina').onclick = ripristinaDatabase;
+
+  // Ensure IDs on existing data
+  salva(LS_ARRIVI, carica(LS_ARRIVI).map(ensureId));
+  salva(LS_CONS,   carica(LS_CONS).map(ensureId));
+
+  aggiornaRubrica();
+  aggiornaArrivi();
+  aggiornaConsegnati();
+
+  $('#btn-add-inquilino').onclick = aggiungiInRubrica;
+  $('#btn-edit-inquilino').onclick = modificaInquilino;
+  $('#btn-del-inquilino').onclick  = eliminaInquilino;
+  $('#sel-inquilino').onchange     = selezionaInquilino;
+
+  $('#btn-salva').onclick          = salvaArrivo;
+  $('#btn-racc').onclick           = salvaRaccomandata;
+  $('#btn-whatsapp').onclick       = inviaWhatsAppForm;
+
+  $('#btn-stampa-arrivi').onclick  = stampaArrivi;
+  $('#btn-stampa-cons').onclick    = stampaConsegnati;
+  $('#btn-stampa-rubrica').onclick = stampaRubrica;
+
+  $('#btn-esporta-excel').onclick  = esportaExcel;
+
+  $('#btn-svuota-arrivi').onclick  = ()=>{ if(confirm('Svuotare arrivi?')) { localStorage.removeItem(LS_ARRIVI); aggiornaArrivi(); } };
+  $('#btn-svuota-cons').onclick    = ()=>{ if(confirm('Svuotare consegnati?')) { localStorage.removeItem(LS_CONS); aggiornaConsegnati(); } };
+
+  $('#btn-apri-manuale').onclick   = ()=>window.open('Manuale_Portineria_Casalmonferrato2C_GValentini_Grafico_Contatti.pdf','_blank');
+
+  // Reset filtri
+  const ra = $('#btn-reset-arrivi'); if(ra) ra.onclick = ()=>{
+    ['f-arrivi-da','f-arrivi-a','f-arrivi-nome','f-arrivi-interno','f-arrivi-corriere','f-arrivi-codice','f-arrivi-note','f-arrivi-wa']
+      .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    aggiornaArrivi();
+  };
+  const rc = $('#btn-reset-cons'); if(rc) rc.onclick = ()=>{
+    ['f-cons-da','f-cons-a','f-cons-nome','f-cons-rit','f-cons-corriere','f-cons-codice','f-cons-interno','f-cons-note']
+      .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    aggiornaConsegnati();
+  };
+
+  // Input listeners
+  ['f-arrivi-da','f-arrivi-a','f-arrivi-nome','f-arrivi-interno','f-arrivi-corriere','f-arrivi-codice','f-arrivi-note','f-arrivi-wa']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', aggiornaArrivi); });
+  ['f-cons-da','f-cons-a','f-cons-nome','f-cons-rit','f-cons-corriere','f-cons-codice','f-cons-interno','f-cons-note']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', aggiornaConsegnati); });
+}
+
+document.addEventListener('DOMContentLoaded', avviaApp);
+</script>
+
+<script>
+/* Fallback export (offline) - se XLSX non è disponibile, esporta in .xls (HTML) o .json */
+function __ppDownload(filename, content, mime){
+  try{
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }catch(e){ console.log(e); alert('Download non riuscito.'); }
+}
+function __ppEscape(s){
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function __ppExportXlsHtml(filename, aoa){
+  let html = '<html><head><meta charset="utf-8"></head><body><table border="1">';
+  for(const row of aoa){
+    html += '<tr>' + row.map(c=>'<td>'+__ppEscape(c)+'</td>').join('') + '</tr>';
+  }
+  html += '</table></body></html>';
+  __ppDownload(filename, html, 'application/vnd.ms-excel');
+}
+</script>
+
+</body>
+</html>
