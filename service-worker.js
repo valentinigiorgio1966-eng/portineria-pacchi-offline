@@ -1,4 +1,4 @@
-const CACHE_NAME = 'portineria-pacchi-cache-v1770195821';
+const CACHE_NAME = 'portineria-pacchi-cache-v1770197279';
 const PRECACHE = [
   './',
   './index.html',
